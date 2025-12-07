@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคำนวณดอกเบี้ยทบต้นและ DCA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+        .kanit-semibold {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-7xl mx-auto">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-indigo-600 dark:text-indigo-400 kanit-semibold">เครื่องคำนวณดอกเบี้ยทบต้นและ DCA</h1>
+            <p class="mt-2 text-lg text-gray-600 dark:text-gray-400">วางแผนอนาคตทางการเงินของคุณด้วยการคำนวณผลตอบแทนจากการลงทุน</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Input Form Section -->
+            <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-6 border-b pb-3 border-gray-200 dark:border-gray-700">ข้อมูลการลงทุน</h2>
+                <form id="calculator-form" class="space-y-4">
+                    <div>
+                        <label for="initialInvestment" class="block text-sm font-medium text-gray-700 dark:text-gray-300">เงินลงทุนเริ่มต้น (PV)</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span class="text-gray-500 sm:text-sm">฿</span>
+                            </div>
+                            <input type="number" id="initialInvestment" value="100000" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 pl-7 pr-12 focus:border-indigo-500 focus:ring-indigo-500" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="monthlyContribution" class="block text-sm font-medium text-gray-700 dark:text-gray-300">เงินลงทุนเพิ่มต่อเดือน (DCA)</label>
+                         <div class="mt-1 relative rounded-md shadow-sm">
+                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span class="text-gray-500 sm:text-sm">฿</span>
+                            </div>
+                            <input type="number" id="monthlyContribution" value="5000" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 pl-7 pr-12 focus:border-indigo-500 focus:ring-indigo-500" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="interestRate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">อัตราผลตอบแทนต่อปี (i)</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <input type="number" id="interestRate" value="7" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 pr-7 pl-4 focus:border-indigo-500 focus:ring-indigo-500" placeholder="0.00">
+                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span class="text-gray-500 sm:text-sm">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="years" class="block text-sm font-medium text-gray-700 dark:text-gray-300">ระยะเวลาลงทุน (n)</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <input type="number" id="years" value="20" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 pr-12 pl-4 focus:border-indigo-500 focus:ring-indigo-500" placeholder="0">
+                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span class="text-gray-500 sm:text-sm">ปี</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        คำนวณ
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-container" class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg" style="display: none;">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-3 border-gray-200 dark:border-gray-700">ผลลัพธ์การลงทุน</h2>
+                
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
+                    <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">มูลค่าในอนาคต (FV)</h3>
+                        <p id="resultFV" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">฿0</p>
+                    </div>
+                    <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">เงินต้นทั้งหมด</h3>
+                        <p id="resultPrincipal" class="text-2xl font-bold text-orange-500 mt-1">฿0</p>
+                    </div>
+                    <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">ดอกเบี้ย/ผลตอบแทน</h3>
+                        <p id="resultInterest" class="text-2xl font-bold text-yellow-500 mt-1">฿0</p>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="mb-8">
+                     <canvas id="resultsChart"></canvas>
+                </div>
+
+                <!-- Data Table -->
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">ตารางสรุปผลรายปี</h3>
+                        <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">
+                            คัดลอกข้อมูลสำหรับ Google Sheets
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto max-h-80 relative shadow-md rounded-lg">
+                        <table id="results-table" class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0">
+                                <tr>
+                                    <th scope="col" class="py-3 px-6">ปีที่</th>
+                                    <th scope="col" class="py-3 px-6">เงินต้นสะสม</th>
+                                    <th scope="col" class="py-3 px-6">ดอกเบี้ย/ผลตอบแทนสะสม</th>
+                                    <th scope="col" class="py-3 px-6">มูลค่ารวมสิ้นปี</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody">
+                                <!-- Data will be injected here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">*การคำนวณนี้เป็นเพียงการประมาณการเพื่อประกอบการวางแผนเท่านั้น ผลตอบแทนจริงอาจแตกต่างกันไป</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('calculator-form');
+            const resultsContainer = document.getElementById('results-container');
+            let myChart;
+
+            // Function to format currency
+            const currencyFormatter = new Intl.NumberFormat('th-TH', {
+                style: 'currency',
+                currency: 'THB',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+
+            // Trigger calculation on page load with default values
+            calculateAndDisplay();
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                calculateAndDisplay();
+            });
+
+            function calculateAndDisplay() {
+                // Get values from the form
+                const initialInvestment = parseFloat(document.getElementById('initialInvestment').value) || 0;
+                const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value) || 0;
+                const annualRate = parseFloat(document.getElementById('interestRate').value) / 100 || 0;
+                const years = parseInt(document.getElementById('years').value) || 0;
+
+                if (years === 0) return;
+                
+                const monthlyRate = annualRate / 12;
+                const totalMonths = years * 12;
+
+                let futureValue = initialInvestment;
+                let totalPrincipal = initialInvestment;
+                let totalInterest = 0;
+
+                const annualData = [];
+                
+                // Calculate values month by month
+                for (let m = 1; m <= totalMonths; m++) {
+                    const interestThisMonth = futureValue * monthlyRate;
+                    futureValue += interestThisMonth;
+                    futureValue += monthlyContribution;
+                    totalPrincipal += monthlyContribution;
+                    
+                    // Store data at the end of each year
+                    if (m % 12 === 0 || m === totalMonths) {
+                         const currentYear = Math.ceil(m / 12);
+                         const cumulativeInterest = futureValue - totalPrincipal;
+                         annualData[currentYear-1] = {
+                             year: currentYear,
+                             principal: totalPrincipal,
+                             interest: cumulativeInterest,
+                             total: futureValue
+                         };
+                    }
+                }
+
+                // Update summary cards
+                document.getElementById('resultFV').textContent = currencyFormatter.format(futureValue);
+                document.getElementById('resultPrincipal').textContent = currencyFormatter.format(totalPrincipal);
+                totalInterest = futureValue - totalPrincipal;
+                document.getElementById('resultInterest').textContent = currencyFormatter.format(totalInterest);
+
+                // Update table
+                const tableBody = document.getElementById('resultsTableBody');
+                tableBody.innerHTML = '';
+                annualData.forEach(data => {
+                    const row = `
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">${data.year}</th>
+                            <td class="py-4 px-6">${currencyFormatter.format(data.principal)}</td>
+                            <td class="py-4 px-6">${currencyFormatter.format(data.interest)}</td>
+                            <td class="py-4 px-6 font-semibold">${currencyFormatter.format(data.total)}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+                
+                // Update chart
+                updateChart(annualData);
+
+                // Show results
+                resultsContainer.style.display = 'block';
+            }
+
+            function updateChart(data) {
+                const ctx = document.getElementById('resultsChart').getContext('2d');
+                
+                if (myChart) {
+                    myChart.destroy();
+                }
+
+                const labels = data.map(d => `ปีที่ ${d.year}`);
+                const principalData = data.map(d => d.principal);
+                const interestData = data.map(d => d.interest);
+
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'เงินต้นสะสม',
+                                data: principalData,
+                                backgroundColor: 'rgb(251, 146, 60)', // Orange-400
+                                borderColor: 'rgb(249, 115, 22)', // Orange-500
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'ดอกเบี้ย/ผลตอบแทนสะสม',
+                                data: interestData,
+                                backgroundColor: 'rgb(250, 204, 21)', // Yellow-400
+                                borderColor: 'rgb(234, 179, 8)', // Yellow-500
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'การเติบโตของเงินลงทุน (เงินต้น vs ผลตอบแทน)',
+                                font: { size: 18, family: 'Kanit' }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += currencyFormatter.format(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                title: {
+                                    display: true,
+                                    text: 'ปี',
+                                    font: { family: 'Kanit' }
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                title: {
+                                    display: true,
+                                    text: 'มูลค่า (บาท)',
+                                    font: { family: 'Kanit' }
+                                },
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return '฿' + (value/1000) + 'k';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Copy to clipboard functionality
+            document.getElementById('copy-button').addEventListener('click', () => {
+                const table = document.getElementById('results-table');
+                let dataString = '';
+
+                // Headers
+                const headers = table.querySelectorAll('thead th');
+                let headerArray = [];
+                headers.forEach(header => headerArray.push(header.innerText));
+                dataString += headerArray.join('\t') + '\n';
+                
+                // Body
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td, th');
+                    let rowArray = [];
+                    cells.forEach(cell => {
+                        // Remove currency symbols and commas for easier pasting into sheets
+                        const cleanText = cell.innerText.replace(/[฿,]/g, '');
+                        rowArray.push(cleanText);
+                    });
+                    dataString += rowArray.join('\t') + '\n';
+                });
+
+                navigator.clipboard.writeText(dataString).then(() => {
+                    const button = document.getElementById('copy-button');
+                    const originalText = button.innerText;
+                    button.innerText = 'คัดลอกแล้ว!';
+                    button.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    button.classList.add('bg-blue-500');
+                    setTimeout(() => {
+                        button.innerText = originalText;
+                        button.classList.remove('bg-blue-500');
+                        button.classList.add('bg-green-500', 'hover:bg-green-600');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
