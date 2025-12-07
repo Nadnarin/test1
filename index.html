@@ -187,6 +187,15 @@
                          };
                     }
                 }
+                function sendHeight() {
+                  const h = document.documentElement.scrollHeight || document.body.scrollHeight;
+                  if (window.parent !== window) {
+                    // ส่งเป็น object หรือ stringified JSON
+                    window.parent.postMessage({ type: 'mf-height', height: h }, '*');
+                  }
+                }
+                sendHeight();
+                new ResizeObserver(sendHeight).observe(document.documentElement);
 
                 // Update summary cards
                 document.getElementById('resultFV').textContent = currencyFormatter.format(futureValue);
@@ -341,3 +350,5 @@
     </script>
 </body>
 </html>
+
+
